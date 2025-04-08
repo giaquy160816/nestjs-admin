@@ -17,19 +17,23 @@ export class UserService {
         return this.userRepository.save(user);
     }
 
-    async findAll(): Promise<User[]> {
+    async find(): Promise<User[]> {
         return this.userRepository.find();
     }
 
-    async findProfile(): Promise<User[]> {
+    async findAll(): Promise<User[]> {
         return this.userRepository.createQueryBuilder('user')
             .leftJoinAndSelect('user.profile', 'profile')
+            .leftJoinAndSelect('user.photos', 'photos')
             .select([
                 'user.id',
                 'user.fullname',
                 'user.email',
                 'profile.avatar',
                 'profile.id',
+                'photos.id',
+                'photos.name',
+                'photos.filename',
             ])
             .getMany();
     }

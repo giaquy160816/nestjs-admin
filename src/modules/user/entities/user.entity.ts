@@ -1,5 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn, OneToOne, JoinColumn, UpdateDateColumn, CreateDateColumn } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn, OneToOne, OneToMany, UpdateDateColumn, CreateDateColumn } from "typeorm";
 import { Profile } from "../../profile/entities/profile.entity";
+import { Photo } from "../../photo/entities/photo.entity";
 
 @Entity()
 export class User {
@@ -18,15 +19,18 @@ export class User {
     password: string;
 
     @CreateDateColumn({
-            type: 'timestamptz',
-        })
+        type: 'timestamptz',
+    })
     createdAt: Date;
 
     @UpdateDateColumn({
-            type: 'timestamptz',
-        })
+        type: 'timestamptz',
+    })
     updatedAt: Date;
 
     @OneToOne(() => Profile, (profile) => profile.user)
     profile: Profile;
+    
+    @OneToMany(() => Photo, (photo) => photo.user)
+    photos: Photo[];
 }
