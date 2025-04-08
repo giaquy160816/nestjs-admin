@@ -3,23 +3,7 @@ import { IsEmail, IsNotEmpty, IsString, IsOptional, IsDate, IsEnum } from "class
 export class CreateUserDto {
     @IsNotEmpty()
     @IsString()
-    fullName: string;
-
-    @IsOptional()
-    @IsDate()
-    dob?: Date;
-
-    @IsOptional()
-    @IsEnum(['male', 'female'])
-    gender?: string;
-
-    @IsOptional()
-    @IsString()
-    firstName?: string;
-
-    @IsOptional()
-    @IsString()
-    lastName?: string;
+    fullname: string;
 
     @IsNotEmpty()
     @IsEmail()

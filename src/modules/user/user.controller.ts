@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Query, Put } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './entities/user.entity';
@@ -12,6 +12,11 @@ export class UserController {
     @Get()
     findAll(): Promise<User[]> {
         return this.userService.findAll();
+    }
+
+    @Get('all')
+    findProfile(): Promise<User[]> {
+        return this.userService.findProfile();
     }
 
     @Get('search')
