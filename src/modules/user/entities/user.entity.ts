@@ -19,18 +19,26 @@ export class User {
     password: string;
 
     @CreateDateColumn({
-        type: 'timestamptz',
+        type: 'timestamp',
     })
     createdAt: Date;
 
     @UpdateDateColumn({
-        type: 'timestamptz',
+        type: 'timestamp',
     })
     updatedAt: Date;
 
+    @Column({
+        type: 'varchar',
+        length: 255,
+        nullable: true,
+        default: 'user'
+    })
+    roles: string;
+
     @OneToOne(() => Profile, (profile) => profile.user)
     profile: Profile;
-    
+
     @OneToMany(() => Photo, (photo) => photo.user)
     photos: Photo[];
 }

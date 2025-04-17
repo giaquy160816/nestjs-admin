@@ -4,6 +4,8 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { Repository, Like } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
+import PostgresDataSource from '../../datasources/postgres.datasource';
+import { hashPassword } from '../../utils/password/password.utils';
 
 @Injectable()
 export class UserService {
@@ -13,8 +15,35 @@ export class UserService {
     ) {}
 
     async create(createUserDto: CreateUserDto): Promise<User> {
+        // If password is provided, hash it before saving
+        if (createUserDto.password) {
+            createUserDto.password = await hashPassword(createUserDto.password);
+        }
+
         const user = this.userRepository.create(createUserDto);
+
         return this.userRepository.save(user);
+    }
+
+    async testFunction() {
+
+        const queryRunner = PostgresDataSource.createQueryRunner()
+        await queryRunner.connect()
+        await queryRunner.startTransaction()
+
+        try {
+            const qr = await queryRunner.query(`CALL update_car_name($1, $2)`, [1, null]);
+            await queryRunner.commitTransaction()
+            return qr;
+        } catch (error) {
+            console.error('Error:', error);
+            await queryRunner.rollbackTransaction()
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        } finally {
+            // you need to release query runner which is manually created:
+            await queryRunner.release()
+        }
+
     }
 
     async find(): Promise<User[]> {
@@ -69,6 +98,12 @@ export class UserService {
         if (!user) {
             throw new HttpException('User not found', HttpStatus.NOT_FOUND);
         }
+
+        // If password is being updated, hash it
+        if (updateUserDto.password) {
+            updateUserDto.password = await hashPassword(updateUserDto.password);
+        }
+
         return this.userRepository.save({ ...user, ...updateUserDto });
     }
 
@@ -76,9 +111,9 @@ export class UserService {
         try {
             // Get the EntityManager from the repository
             const entityManager = this.userRepository.manager;
-            
+
             // Find user with profile relation
-            const user = await this.userRepository.findOne({ 
+            const user = await this.userRepository.findOne({
                 where: { id: Number(id) },
                 relations: { profile: true }
             });
@@ -113,7 +148,7 @@ export class UserService {
                 throw error;
             }
             throw new HttpException(
-                'Failed to remove user', 
+                'Failed to remove user',
                 HttpStatus.INTERNAL_SERVER_ERROR
             );
         }
