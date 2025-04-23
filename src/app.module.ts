@@ -6,11 +6,12 @@ import { PhotoModule } from './modules/photo/photo.module';
 import { CategoryModule } from './modules/category/category.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { AuthMiddleware } from './middlewares/auth/auth.middleware';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import configuration from './config/configuration';
 import PostgresDataSource from './datasources/postgres.datasource';
 import MysqlDataSource from './datasources/mysql.datasource';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { log } from 'console';
 
 @Module({
     imports: [
@@ -19,14 +20,28 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
             envFilePath: ['.env'],
             load: [configuration],
         }),
-        TypeOrmModule.forRoot({
-            ...PostgresDataSource.options,
-            autoLoadEntities: true,
+        TypeOrmModule.forRootAsync({
+            inject: [ConfigService],
+            useFactory: () => {
+                return {
+                    ...PostgresDataSource.options,
+                    autoLoadEntities: true,
+                    synchronize: true,
+                }
+            },
         }),
-        // TypeOrmModule.forRoot({
-        //     ...MysqlDataSource.options,
-        //     autoLoadEntities: true,
-        // }),
+        
+        TypeOrmModule.forRootAsync({
+            name: 'mysqlConnection',
+            inject: [ConfigService],
+            useFactory: () => {
+                return {
+                    ...MysqlDataSource.options,
+                    autoLoadEntities: true,
+                    synchronize: true,
+                }
+            },
+        }),
         // AuthModule is imported first to make JwtService available to other modules
         AuthModule,
         UserModule,
@@ -52,6 +67,7 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 })
 export class AppModule implements NestModule {
     configure(consumer: MiddlewareConsumer) {
+        console.log('[AppModule] Configuring AuthMiddleware exclusions: auth/login, auth/register, auth/refresh-token');
         consumer
             .apply(AuthMiddleware)
             .exclude(

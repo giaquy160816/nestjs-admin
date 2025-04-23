@@ -5,7 +5,6 @@ import { Repository, Like } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import PostgresDataSource from '../../datasources/postgres.datasource';
-import { hashPassword } from '../../utils/password/password.utils';
 
 @Injectable()
 export class UserService {
@@ -15,13 +14,7 @@ export class UserService {
     ) {}
 
     async create(createUserDto: CreateUserDto): Promise<User> {
-        // If password is provided, hash it before saving
-        if (createUserDto.password) {
-            createUserDto.password = await hashPassword(createUserDto.password);
-        }
-
         const user = this.userRepository.create(createUserDto);
-
         return this.userRepository.save(user);
     }
 
@@ -99,20 +92,13 @@ export class UserService {
             throw new HttpException('User not found', HttpStatus.NOT_FOUND);
         }
 
-        // If password is being updated, hash it
-        if (updateUserDto.password) {
-            updateUserDto.password = await hashPassword(updateUserDto.password);
-        }
-
         return this.userRepository.save({ ...user, ...updateUserDto });
     }
 
     async remove(id: string): Promise<{ message: string }> {
         try {
-            // Get the EntityManager from the repository
             const entityManager = this.userRepository.manager;
 
-            // Find user with profile relation
             const user = await this.userRepository.findOne({
                 where: { id: Number(id) },
                 relations: { profile: true }
@@ -124,7 +110,6 @@ export class UserService {
 
             // Start a transaction
             await entityManager.transaction(async transactionalEntityManager => {
-                // If profile exists, remove it first
                 if (user.profile) {
                     await transactionalEntityManager
                         .getRepository('Profile')

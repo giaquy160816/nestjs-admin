@@ -1,25 +1,14 @@
 import { DataSource } from "typeorm";
-import * as dotenv from 'dotenv';
-import { join } from 'path';
 import configuration from '../config/configuration';
 
-// Load environment variables from .env file
-dotenv.config();
-
-// Define the entities path
-const entitiesPath = join(__dirname, '..', '**', '*.entity.{ts,js}');
 
 const PostgresDataSource = new DataSource({
-    type: configuration().database.type as any,
-    host: configuration().database.host,
-    port: configuration().database.port,
-    username: configuration().database.username,
-    password: configuration().database.password,
-    database: configuration().database.database,
-    entities: [entitiesPath],
-    synchronize: true,
-    logging: true,
-    ssl: false,
+    type: 'postgres',
+    host: configuration().database_postgres.host,
+    port: parseInt(String(configuration().database_postgres.port)),
+    username: configuration().database_postgres.username,
+    password: configuration().database_postgres.password,
+    database: configuration().database_postgres.database
 });
 
 // Don't initialize the DataSource here, let NestJS handle it

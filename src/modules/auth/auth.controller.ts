@@ -1,30 +1,24 @@
-import { Controller, Post, Req, Body } from '@nestjs/common';
+import { Controller, Post, Body } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
-import { Request } from 'express';
-import { Throttle } from '@nestjs/throttler';
+import { LoginDto } from './dto/login.dto';
 
 @Controller('auth')
 export class AuthController {
-    constructor(
-        private readonly authService: AuthService
-    ) { }
+    constructor(private readonly authService: AuthService) {}
 
     @Post('login')
-    @Throttle({ default: { limit: 2, ttl: 60000 } })
-    login(@Body() loginDto: LoginDto) {
-        return this.authService.login(loginDto.email, loginDto.password);
+    async login(@Body() loginDto: LoginDto) {
+        return this.authService.login(loginDto);
     }
 
     @Post('register')
-    register(@Body() registerDto: RegisterDto) {
+    async register(@Body() registerDto: RegisterDto) {
         return this.authService.register(registerDto);
     }
 
     @Post('refresh-token')
-    refreshToken(@Req() req: Request) {
-        const tokens = this.authService.refreshToken(req);
-        return tokens;
+    async refreshToken(@Body() refreshTokenDto: any) {
+        return this.authService.refreshToken(refreshTokenDto);
     }
-}
+} 

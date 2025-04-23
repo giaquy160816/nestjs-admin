@@ -1,25 +1,15 @@
 import { DataSource } from "typeorm";
-import * as dotenv from 'dotenv';
-import { join } from 'path';
-
-// Load environment variables from .env file
-dotenv.config();
-
-// Define the entities path
-const entitiesPath = join(__dirname, '..', '**', '*.entity.{ts,js}');
+import configuration from "src/config/configuration";
 
 const MysqlDataSource = new DataSource({
-    type: process.env.DATABASE_MYSQL_TYPE as any || 'mysql',
-    host: process.env.DATABASE_MYSQL_HOST || 'localhost',
-    port: parseInt(process.env.DATABASE_MYSQL_PORT || '3306'),
-    username: process.env.DATABASE_MYSQL_USERNAME || 'root',
-    password: process.env.DATABASE_MYSQL_PASSWORD || '@dmin1234',
-    database: process.env.DATABASE_MYSQL_NAME || 'learn',
-    entities: [entitiesPath],
-    synchronize: true,
-    logging: true,
-    ssl: false,
+    type: 'mysql',
+    host: configuration().database_mysql.host,
+    port: parseInt(String(configuration().database_mysql.port)),
+    username: configuration().database_mysql.username,
+    password: configuration().database_mysql.password,
+    database: configuration().database_mysql.database
 });
+
 
 // Don't initialize the DataSource here, let NestJS handle it
 MysqlDataSource.initialize()

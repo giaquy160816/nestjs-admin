@@ -1,6 +1,8 @@
-import { Column, Entity, PrimaryGeneratedColumn, OneToOne, OneToMany, UpdateDateColumn, CreateDateColumn } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn, OneToOne, OneToMany, UpdateDateColumn, CreateDateColumn, JoinColumn } from "typeorm";
 import { Profile } from "../../profile/entities/profile.entity";
 import { Photo } from "../../photo/entities/photo.entity";
+import { IsEmail, IsNotEmpty } from "class-validator";
+import { Auth } from '../../auth/entities/auth.entity';
 
 @Entity()
 export class User {
@@ -11,12 +13,10 @@ export class User {
     fullname: string;
 
     @Column()
+    @IsEmail()
+    @IsNotEmpty()
     email: string;
 
-    @Column({
-        nullable: true,
-    })
-    password: string;
 
     @CreateDateColumn({
         type: 'timestamp',
@@ -41,4 +41,8 @@ export class User {
 
     @OneToMany(() => Photo, (photo) => photo.user)
     photos: Photo[];
+
+    @OneToOne(() => Auth, (auth) => auth.user, { cascade: true })
+    @JoinColumn()
+    auth: Auth;
 }
