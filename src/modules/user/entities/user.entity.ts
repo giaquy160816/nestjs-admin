@@ -17,24 +17,23 @@ export class User {
     @IsNotEmpty()
     email: string;
 
-
     @CreateDateColumn({
-        type: 'timestamp',
+        type: 'timestamptz',
     })
     createdAt: Date;
 
     @UpdateDateColumn({
-        type: 'timestamp',
+        type: 'timestamptz',
     })
     updatedAt: Date;
 
     @Column({
-        type: 'varchar',
-        length: 255,
-        nullable: true,
-        default: 'user'
+        type: 'text',
+        array: true,
+        default: ['user'],
     })
-    roles: string;
+    roles: string[];
+    
 
     @OneToOne(() => Profile, (profile) => profile.user)
     profile: Profile;

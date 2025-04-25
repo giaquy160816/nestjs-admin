@@ -12,6 +12,7 @@ import PostgresDataSource from './datasources/postgres.datasource';
 import MysqlDataSource from './datasources/mysql.datasource';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { log } from 'console';
+import { ProductModule } from './modules/product/product.module';
 
 @Module({
     imports: [
@@ -56,6 +57,7 @@ import { log } from 'console';
                 },
             ],
         }),
+        ProductModule,
     ],
     controllers: [],
     providers: [

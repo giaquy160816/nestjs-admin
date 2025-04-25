@@ -14,10 +14,10 @@ const PostgresDataSource = new DataSource({
 // Don't initialize the DataSource here, let NestJS handle it
 PostgresDataSource.initialize()
     .then(() => {
-        console.log('Data Source has been initialized!');
+        console.log('Đã kết nối Postgres');
     })
     .catch((err) => {
-        console.error('Error during Data Source initialization', err);
+        console.error('Postgres lỗi kết nối', err);
     });
 
 export default PostgresDataSource;

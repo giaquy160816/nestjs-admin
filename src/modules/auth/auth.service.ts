@@ -36,7 +36,7 @@ export class AuthService {
             sub: auth.user.id, 
             email: auth.email,
             fullname: auth.user.fullname,
-            roles: auth.user.roles
+            roles: auth.user.roles.join(',')  // Convert array to string
         };
         console.log(payload);
         const tokens = generateTokens(this.jwtService, payload);

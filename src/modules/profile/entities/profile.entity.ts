@@ -19,12 +19,12 @@ export class Profile {
     dob: Date;
 
     @CreateDateColumn({
-        type: 'timestamp',
+        type: 'timestamptz',
     })
     createdAt: Date;
 
     @UpdateDateColumn({
-        type: 'timestamp',
+        type: 'timestamptz',
     })
     updatedAt: Date;
 

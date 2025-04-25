@@ -3,7 +3,6 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './entities/user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { LoggingInterceptor } from '../../interceptors/logging/logging.interceptor';
 import { Roles } from '../../decorators/roles.decorator';
 import { AuthGuard } from '../../guards/auth/auth.guard';
 import { Role } from '../../enums/role.enum';
@@ -38,7 +37,6 @@ export class UserController {
         return this.userService.findOne(id);
     }
 
-    // @UseInterceptors(LoggingInterceptor)
     @Get()
     @UseGuards(AuthGuard)
     @Roles([Role.ADMIN, Role.USER])

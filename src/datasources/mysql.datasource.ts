@@ -14,10 +14,10 @@ const MysqlDataSource = new DataSource({
 // Don't initialize the DataSource here, let NestJS handle it
 MysqlDataSource.initialize()
     .then(() => {
-        console.log('Data Source has been initialized!');
+        console.log('Đã kết nối MYSQL');
     })
     .catch((err) => {
-        console.error('Error during Data Source initialization', err);
+        console.error('MYSQL lỗi kết nối', err);
     });
 
 export default MysqlDataSource;
