@@ -1,5 +1,5 @@
 import { IsBoolean, IsNotEmpty } from "class-validator";
-import { Product } from "src/modules/product/entities/product.entity";
+import { Product } from "src/modules/backend/product/entities/product.entity";
 import { Column, CreateDateColumn, Entity, ManyToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity('category')

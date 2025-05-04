@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { TimeoutInterceptor } from './interceptors/timeout/timeout.interceptor';
 import * as cookieParser from 'cookie-parser';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
@@ -11,8 +12,9 @@ async function bootstrap() {
     app.useGlobalInterceptors(new TimeoutInterceptor());
     // Allow all origins for CORS
 
+    const configService = app.get(ConfigService);
     app.enableCors({
-        origin: true, // Allow all origins
+        origin: configService.get<string[]>('cors.allowedOrigins'),
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
         credentials: true,
     });

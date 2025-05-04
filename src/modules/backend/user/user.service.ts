@@ -4,7 +4,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { Repository, Like } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import PostgresDataSource from '../../datasources/postgres.datasource';
+import PostgresDataSource from 'src/datasources/postgres.datasource';
 
 @Injectable()
 export class UserService {

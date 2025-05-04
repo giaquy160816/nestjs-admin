@@ -1,18 +1,20 @@
-import { Module, NestModule, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { UserModule } from './modules/user/user.module';
-import { ProfileModule } from './modules/profile/profile.module';
-import { PhotoModule } from './modules/photo/photo.module';
-import { CategoryModule } from './modules/category/category.module';
-import { AuthModule } from './modules/auth/auth.module';
-import { AuthMiddleware } from './middlewares/auth/auth.middleware';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import configuration from './config/configuration';
-import PostgresDataSource from './datasources/postgres.datasource';
-import MysqlDataSource from './datasources/mysql.datasource';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
-import { log } from 'console';
-import { ProductModule } from './modules/product/product.module';
+import { TypeOrmModule }    from '@nestjs/typeorm';
+import { UserModule }       from './modules/backend/user/user.module';
+import { ProfileModule }    from './modules/backend/profile/profile.module';
+import { PhotoModule }      from './modules/backend/photo/photo.module';
+import { CategoryModule }   from './modules/backend/category/category.module';
+import { AuthModule }       from './modules/backend/auth/auth.module';
+import { ProductModule }    from './modules/backend/product/product.module';
+import configuration        from './config/configuration';
+import PostgresDataSource   from './datasources/postgres.datasource';
+import MysqlDataSource      from './datasources/mysql.datasource';
+
+import { SanitizeInputMiddleware } from './middlewares/sanitize-input.middleware';
+import { RequestTimingMiddleware } from './middlewares/request-timing.middleware';
+import { IpWhitelistMiddleware } from './middlewares/ip-whitelist.middleware';
 
 @Module({
     imports: [
@@ -31,7 +33,7 @@ import { ProductModule } from './modules/product/product.module';
                 }
             },
         }),
-        
+        /*
         TypeOrmModule.forRootAsync({
             name: 'mysqlConnection',
             inject: [ConfigService],
@@ -43,12 +45,8 @@ import { ProductModule } from './modules/product/product.module';
                 }
             },
         }),
+        */
         // AuthModule is imported first to make JwtService available to other modules
-        AuthModule,
-        UserModule,
-        ProfileModule,
-        PhotoModule,
-        CategoryModule,
         ThrottlerModule.forRoot({
             throttlers: [
                 {
@@ -57,7 +55,12 @@ import { ProductModule } from './modules/product/product.module';
                 },
             ],
         }),
-        ProductModule,
+        AuthModule,
+        UserModule,
+        ProfileModule,
+        PhotoModule,
+        CategoryModule,
+        ProductModule
     ],
     controllers: [],
     providers: [
@@ -69,14 +72,8 @@ import { ProductModule } from './modules/product/product.module';
 })
 export class AppModule implements NestModule {
     configure(consumer: MiddlewareConsumer) {
-        console.log('[AppModule] Configuring AuthMiddleware exclusions: auth/login, auth/register, auth/refresh-token');
         consumer
-            .apply(AuthMiddleware)
-            .exclude(
-                { path: 'auth/login', method: RequestMethod.POST },
-                { path: 'auth/register', method: RequestMethod.POST },
-                { path: 'auth/refresh-token', method: RequestMethod.POST },
-            )
+            .apply(IpWhitelistMiddleware, RequestTimingMiddleware, SanitizeInputMiddleware)
             .forRoutes('*');
     }
 }

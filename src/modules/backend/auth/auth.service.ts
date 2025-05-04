@@ -8,7 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import configuration from 'src/config/configuration';
-import { generateTokens } from '../../utils/token/jwt.utils';
+import { generateTokens } from 'src/utils/token/jwt.utils';
 import { log } from 'console';
 
 @Injectable()

@@ -5,7 +5,6 @@ import { Observable } from 'rxjs';
 import { matchRoles, Roles } from '../../decorators/roles.decorator';
 import { extractTokenFromHeader } from '../../utils/token/extractToken.utils';
 import configuration from '../../config/configuration';
-import { log } from 'console';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -31,17 +30,20 @@ export class AuthGuard implements CanActivate {
             });
             const userRoles = decodeToken.roles ? decodeToken.roles.split(',') : [];
 
-            console.log(userRoles, roles);
-
-            if (!matchRoles(userRoles, roles)) {
+            const isMatch = matchRoles(userRoles, roles);
+            if (!isMatch) {
                 throw new HttpException('Not enough permission', HttpStatus.FORBIDDEN);
             }
+
+            request.user = decodeToken;
+            request.userRoles = userRoles;
+
+            return isMatch;
         } catch (error) {
             if (error instanceof HttpException) {
                 throw error;
             }
 
-            console.log(error);
             // Handle JWT-specific errors
             switch (error.name) {
                 case 'TokenExpiredError':
@@ -52,6 +54,5 @@ export class AuthGuard implements CanActivate {
                     throw new HttpException('Not Valid Token', HttpStatus.UNAUTHORIZED);
             }
         }
-        return true;
     }
 }

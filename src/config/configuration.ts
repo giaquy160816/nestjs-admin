@@ -26,4 +26,7 @@ export default () => ({
             ? process.env.ALLOWED_ORIGINS.split(',')
             : ['http://localhost:3000', 'http://localhost:4000'],
     },
+    ipWhitelist: process.env.IP_WHITELIST
+        ? process.env.IP_WHITELIST.split(',')
+        : ['127.0.0.1', '::1', '::ffff:127.0.0.1'], // default
 });

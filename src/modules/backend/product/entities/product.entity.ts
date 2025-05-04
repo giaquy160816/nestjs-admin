@@ -1,6 +1,6 @@
 import { IsBoolean, IsNotEmpty, IsNumber, IsString, Max, Min } from "class-validator";
 import { Length } from "class-validator";
-import { Category } from "src/modules/category/entities/category.entity";
+import { Category } from "src/modules/backend/category/entities/category.entity";
 import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity('product')
