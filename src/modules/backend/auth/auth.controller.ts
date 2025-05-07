@@ -3,8 +3,10 @@ import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { Public } from 'src/decorators/public.decorator';
 
 @Controller()
+@Public()
 export class AuthController {
     constructor(private readonly authService: AuthService) {}
 

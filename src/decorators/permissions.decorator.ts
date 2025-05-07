@@ -1,5 +1,5 @@
 import { Reflector } from "@nestjs/core";
-export const Roles = Reflector.createDecorator<string[]>();
+export const Permissions = Reflector.createDecorator<string[]>();
 
 // check many roles
 export const matchRoles = (userRoles: string[], requiredRoles: string[]): boolean => {

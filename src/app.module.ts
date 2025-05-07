@@ -1,21 +1,30 @@
+import { APP_GUARD } from '@nestjs/core';
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
-import { TypeOrmModule }    from '@nestjs/typeorm';
-import { UserModule }       from './modules/backend/user/user.module';
-import { ProfileModule }    from './modules/backend/profile/profile.module';
-import { PhotoModule }      from './modules/backend/photo/photo.module';
-import { CategoryModule }   from './modules/backend/category/category.module';
-import { AuthModule }       from './modules/backend/auth/auth.module';
-import { ProductModule }    from './modules/backend/product/product.module';
-import configuration        from './config/configuration';
-import PostgresDataSource   from './datasources/postgres.datasource';
-import MysqlDataSource      from './datasources/mysql.datasource';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { RouterModule } from '@nestjs/core';
 
+
+import configuration from './config/configuration';
+
+//datasource
+import PostgresDataSource from './datasources/postgres.datasource';
+import MysqlDataSource from './datasources/mysql.datasource';
+
+//middlewares
 import { SanitizeInputMiddleware } from './middlewares/sanitize-input.middleware';
 import { RequestTimingMiddleware } from './middlewares/request-timing.middleware';
 import { IpWhitelistMiddleware } from './middlewares/ip-whitelist.middleware';
-import { RouterModule } from '@nestjs/core';
+
+//routes
+import { frontendRoutes, frontendModules } from './routes/frontend.routes';
+import { backendRoutes, backendModules } from './routes/backend.routes';
+
+//guards
+import { AuthGuard } from 'src/guards/auth/auth.guard';
+import { RolesGuard } from 'src/guards/auth/roles.guard';
+
 
 @Module({
     imports: [
@@ -24,6 +33,13 @@ import { RouterModule } from '@nestjs/core';
             envFilePath: ['.env'],
             load: [configuration],
         }),
+        RouterModule.register([
+            ...frontendRoutes,
+            ...backendRoutes,
+        ]),
+        ...frontendModules,
+        ...backendModules,
+
         TypeOrmModule.forRootAsync({
             inject: [ConfigService],
             useFactory: () => {
@@ -55,42 +71,13 @@ import { RouterModule } from '@nestjs/core';
                     limit: 10,
                 },
             ],
-        }),
-        AuthModule,
-        UserModule,
-        ProfileModule,
-        PhotoModule,
-        CategoryModule,
-        ProductModule,
-        RouterModule.register([
-            {
-                path: 'backend/auth',
-                module: AuthModule,
-            },
-            {
-                path: 'backend/user',
-                module: UserModule,
-            },
-            {
-                path: 'backend/profile',
-                module: ProfileModule,
-            },
-            {
-                path: 'backend/photo',
-                module: PhotoModule,
-            },
-            {
-                path: 'backend/category',
-                module: CategoryModule,
-            },
-        ]),
+        })
     ],
     controllers: [],
     providers: [
-        {
-            provide: 'APP_GUARD',
-            useClass: ThrottlerGuard,
-        }
+        { provide: APP_GUARD, useClass: ThrottlerGuard },  //giới hạn số lần gọi API
+        { provide: APP_GUARD, useClass: AuthGuard },
+        { provide: APP_GUARD, useClass: RolesGuard },
     ],
 })
 export class AppModule implements NestModule {

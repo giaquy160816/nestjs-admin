@@ -7,7 +7,6 @@ import { AuthService } from './auth.service';
 import { Auth } from './entities/auth.entity';
 import { Permission } from './entities/permisson.entity';
 import { JwtService } from '@nestjs/jwt';
-import { AuthGuard } from 'src/guards/auth/auth.guard';
 import { GroupPermission } from './entities/group_permission.entity';
 
 @Module({
@@ -19,7 +18,7 @@ import { GroupPermission } from './entities/group_permission.entity';
         }),
     ],
     controllers: [AuthController],
-    providers: [AuthService, JwtService, AuthGuard],
-    exports: [AuthService, JwtModule, AuthGuard],
+    providers: [AuthService, JwtService],
+    exports: [AuthService, JwtModule],
 })
 export class AuthModule { }
