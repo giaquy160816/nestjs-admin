@@ -2,18 +2,22 @@ import { CanActivate, ExecutionContext, HttpException, HttpStatus, Injectable } 
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Observable } from 'rxjs';
-import { matchRoles, Roles } from '../../decorators/roles.decorator';
-import { extractTokenFromHeader } from '../../utils/token/extractToken.utils';
-import configuration from '../../config/configuration';
-
+import { matchRoles, Roles } from 'src/decorators/roles.decorator';
+import { extractTokenFromHeader } from 'src/utils/token/extractToken.utils';
+import configuration from 'src/config/configuration';
+import * as roleUtils from 'src/utils/role/role.utils';
+import { DataSource } from 'typeorm';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { decryptPayload } from 'src/utils/token/jwt-encrypt.utils';
 @Injectable()
 export class AuthGuard implements CanActivate {
     constructor(
         private jwtService: JwtService,
-        private reflector: Reflector
+        private reflector: Reflector,
+        @InjectDataSource('default') private dataSource: DataSource
     ) { }
 
-    canActivate( context: ExecutionContext ): boolean | Promise<boolean> | Observable<boolean> {
+    async canActivate( context: ExecutionContext ): Promise<boolean> {
         const roles = this.reflector.get<string[]>(Roles, context.getHandler());
         if (!roles) return true;
 
@@ -28,16 +32,19 @@ export class AuthGuard implements CanActivate {
             const decodeToken = this.jwtService.verify(token, {
                 secret: configuration().jwt.secret,
             });
-            const userRoles = decodeToken.roles ? decodeToken.roles.split(',') : [];
+            const dataPayload = decryptPayload(decodeToken.data) as JwtDecryptedPayload;
+            const userRoles = dataPayload.roles.split('|');
+
+            console.log('dataPayload', dataPayload);
+            console.log('roles', roles);
+            // console.log('userRoles', userRoles);
+            console.log('userRoles', userRoles);
+
 
             const isMatch = matchRoles(userRoles, roles);
             if (!isMatch) {
                 throw new HttpException('Not enough permission', HttpStatus.FORBIDDEN);
             }
-
-            request.user = decodeToken;
-            request.userRoles = userRoles;
-
             return isMatch;
         } catch (error) {
             if (error instanceof HttpException) {

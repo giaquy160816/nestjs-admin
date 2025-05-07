@@ -10,7 +10,7 @@ import { PermissionGuard } from 'src/guards/permission/permission.guard';
 import { Permissions } from 'src/decorators/permission.decorator';
 import { Action } from 'src/enums/action.enum';
 
-@Controller('user')
+@Controller()
 export class UserController {
     constructor(private userService: UserService) { }
 
@@ -20,11 +20,8 @@ export class UserController {
     }
 
     @Get('all')
-    @UseGuards(AuthGuard, PermissionGuard)
-    @Roles([Role.ADMIN, Role.USER])
-    @Permissions([
-        { action: Action.Read, subject: User }
-    ])
+    @UseGuards(AuthGuard)
+    @Roles(['user_get_all_111'])
     findAll(): Promise<User[]> {
         return this.userService.findAll();
     }

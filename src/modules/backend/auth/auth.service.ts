@@ -7,9 +7,8 @@ import { RegisterDto } from './dto/register.dto';
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
-import configuration from 'src/config/configuration';
-import { generateTokens } from 'src/utils/token/jwt.utils';
-import { log } from 'console';
+import configuration from '../../../config/configuration';
+import { generateTokens } from '../../../utils/token/jwt.utils';
 
 @Injectable()
 export class AuthService {
@@ -17,13 +16,13 @@ export class AuthService {
         @InjectRepository(Auth)
         private authRepository: Repository<Auth>,
         private jwtService: JwtService,
-    ) {}
+    ) { }
 
     async login(loginDto: LoginDto) {
         const { email, password } = loginDto;
         const auth = await this.authRepository.findOne({
             where: { email },
-            relations: ['user']
+            relations: ['user', 'user.groupPermissions', 'user.groupPermissions.permissions']
         });
         if (!auth) {
             throw new BadRequestException('Invalid email or password');
@@ -32,14 +31,29 @@ export class AuthService {
         if (!isMatch) {
             throw new BadRequestException('Invalid email or password');
         }
-        const payload = { 
-            sub: auth.user.id, 
-            email: auth.email,
-            fullname: auth.user.fullname,
-            roles: auth.user.roles.join(',')  // Convert array to string
+
+        const user = auth.user;
+
+        const roles = Array.from(
+            new Set(
+                user.groupPermissions.flatMap(gp =>
+                    gp.permissions.map(p => p.role)
+                )
+            )
+        );
+
+        const payload = {
+            sub: user.id,
+            email: user.email,
+            fullname: user.fullname,
+            roles: roles.join('|')
         };
+        
         console.log(payload);
-        const tokens = generateTokens(this.jwtService, payload);
+        const tokens = generateTokens(
+            this.jwtService,
+            payload
+        );
         return {
             token: tokens,
             message: 'Login successful',
@@ -52,7 +66,7 @@ export class AuthService {
 
         // Check if email already exists
         const existingAuth = await this.authRepository.findOne({ where: { email } });
-        
+
         if (existingAuth) {
             throw new HttpException('Email already exists', HttpStatus.BAD_REQUEST);
         }

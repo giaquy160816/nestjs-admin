@@ -15,6 +15,7 @@ import MysqlDataSource      from './datasources/mysql.datasource';
 import { SanitizeInputMiddleware } from './middlewares/sanitize-input.middleware';
 import { RequestTimingMiddleware } from './middlewares/request-timing.middleware';
 import { IpWhitelistMiddleware } from './middlewares/ip-whitelist.middleware';
+import { RouterModule } from '@nestjs/core';
 
 @Module({
     imports: [
@@ -60,7 +61,29 @@ import { IpWhitelistMiddleware } from './middlewares/ip-whitelist.middleware';
         ProfileModule,
         PhotoModule,
         CategoryModule,
-        ProductModule
+        ProductModule,
+        RouterModule.register([
+            {
+                path: 'backend/auth',
+                module: AuthModule,
+            },
+            {
+                path: 'backend/user',
+                module: UserModule,
+            },
+            {
+                path: 'backend/profile',
+                module: ProfileModule,
+            },
+            {
+                path: 'backend/photo',
+                module: PhotoModule,
+            },
+            {
+                path: 'backend/category',
+                module: CategoryModule,
+            },
+        ]),
     ],
     controllers: [],
     providers: [

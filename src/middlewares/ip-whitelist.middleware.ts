@@ -13,7 +13,6 @@ export class IpWhitelistMiddleware implements NestMiddleware {
             : req.socket.remoteAddress) ?? 'UNKNOWN_IP';
 
         const whitelist = this.configService.get<string[]>('ipWhitelist') || [];
-
         if (!whitelist.includes(ip)) {
             throw new ForbiddenException(`IP ${ip} is not allowed`);
         }

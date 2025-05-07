@@ -5,7 +5,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { FileInterceptor } from '@nestjs/platform-express/multer';
 import { ParseFilePipeBuilder } from '@nestjs/common/pipes';
 
-@Controller('product')
+@Controller()
 export class ProductController {
     constructor(private readonly productService: ProductService) { }
 

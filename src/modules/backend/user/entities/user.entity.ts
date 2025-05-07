@@ -1,8 +1,9 @@
-import { Column, Entity, PrimaryGeneratedColumn, OneToOne, OneToMany, UpdateDateColumn, CreateDateColumn, JoinColumn } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn, OneToOne, OneToMany, UpdateDateColumn, CreateDateColumn, JoinColumn, ManyToMany, JoinTable } from "typeorm";
 import { Profile } from "../../profile/entities/profile.entity";
 import { Photo } from "../../photo/entities/photo.entity";
 import { IsEmail, IsNotEmpty } from "class-validator";
 import { Auth } from '../../auth/entities/auth.entity';
+import { GroupPermission } from "../../auth/entities/group_permission.entity";
 
 @Entity()
 export class User {
@@ -26,13 +27,6 @@ export class User {
         type: 'timestamptz',
     })
     updatedAt: Date;
-
-    @Column({
-        type: 'text',
-        array: true,
-        default: ['user'],
-    })
-    roles: string[];
     
 
     @OneToOne(() => Profile, (profile) => profile.user)
@@ -44,4 +38,8 @@ export class User {
     @OneToOne(() => Auth, (auth) => auth.user, { cascade: true })
     @JoinColumn()
     auth: Auth;
+
+    @ManyToMany(() => GroupPermission, (groupPermission) => groupPermission.users)
+    @JoinTable()
+    groupPermissions: GroupPermission[];
 }

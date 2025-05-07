@@ -5,7 +5,6 @@ import { Permissions } from 'src/decorators/permission.decorator';
 import { Permission as IPermission } from 'src/interface/permission';
 import { Reflector } from '@nestjs/core';
 import { ForbiddenError } from '@casl/ability';
-import { User } from 'src/modules/backend/user/entities/user.entity';
 
 @Injectable()
 export class PermissionGuard implements CanActivate {

@@ -5,12 +5,14 @@ import configuration from '../../../config/configuration';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { Auth } from './entities/auth.entity';
+import { Permission } from './entities/permisson.entity';
 import { JwtService } from '@nestjs/jwt';
 import { AuthGuard } from 'src/guards/auth/auth.guard';
+import { GroupPermission } from './entities/group_permission.entity';
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([Auth]),
+        TypeOrmModule.forFeature([Auth, Permission, GroupPermission]),
         JwtModule.register({
             secret: configuration().jwt.secret,
             signOptions: { expiresIn: configuration().jwt.expires || '1h' },

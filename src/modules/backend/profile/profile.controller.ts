@@ -4,7 +4,7 @@ import { CreateProfileDto } from './dto/create-profile.dto';
 import { Profile } from './entities/profile.entity';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 
-@Controller('profile')
+@Controller()
 export class ProfileController {
     constructor(private readonly profileService: ProfileService) { }
 
