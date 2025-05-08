@@ -1,42 +1,27 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Repository, Like } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import PostgresDataSource from 'src/datasources/postgres.datasource';
+
+import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
+import { RedisClientType } from 'redis';
 
 @Injectable()
 export class UserService {
     constructor(
         @InjectRepository(User)
         private userRepository: Repository<User>,
-    ) {}
+        @Inject(CACHE_MANAGER) private cacheManager: Cache,
+
+        @Inject('REDIS_CLIENT')
+        private readonly redisClient: RedisClientType
+    ) { }
 
     async create(createUserDto: CreateUserDto): Promise<User> {
         const user = this.userRepository.create(createUserDto);
         return this.userRepository.save(user);
-    }
-
-    async testFunction() {
-
-        const queryRunner = PostgresDataSource.createQueryRunner()
-        await queryRunner.connect()
-        await queryRunner.startTransaction()
-
-        try {
-            const qr = await queryRunner.query(`CALL update_car_name($1, $2)`, [1, null]);
-            await queryRunner.commitTransaction()
-            return qr;
-        } catch (error) {
-            console.error('Error:', error);
-            await queryRunner.rollbackTransaction()
-            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
-        } finally {
-            // you need to release query runner which is manually created:
-            await queryRunner.release()
-        }
-
     }
 
     async find(): Promise<User[]> {
@@ -44,20 +29,24 @@ export class UserService {
     }
 
     async findAll(): Promise<User[]> {
-        return this.userRepository.createQueryBuilder('user')
-            .leftJoinAndSelect('user.profile', 'profile')
-            .leftJoinAndSelect('user.photos', 'photos')
+        const cached = await this.redisClient.get('users');
+        if (cached) {
+            console.log('From Redis');
+            return JSON.parse(cached);
+        }
+        console.log('From Database');
+        const users = await this.userRepository.createQueryBuilder('user')
             .select([
                 'user.id',
                 'user.fullname',
                 'user.email',
-                'profile.avatar',
-                'profile.id',
-                'photos.id',
-                'photos.name',
-                'photos.filename',
             ])
             .getMany();
+        
+        await this.redisClient.set('users', JSON.stringify(users), {
+            EX: 60,
+        });
+        return users;
     }
 
     async search(q: string): Promise<User[]> {

@@ -7,6 +7,7 @@ import { extractTokenFromHeader } from 'src/utils/token/extractToken.utils';
 import configuration from 'src/config/configuration';
 import { decryptPayload } from 'src/utils/token/jwt-encrypt.utils';
 
+
 @Injectable()
 export class AuthGuard implements CanActivate {
     constructor(
@@ -33,6 +34,9 @@ export class AuthGuard implements CanActivate {
             const decodeToken = await this.jwtService.verifyAsync(token, {
                 secret: configuration().jwt.secret,
             });
+
+
+
             const dataPayload = decryptPayload(decodeToken.data) as JwtDecryptedPayload;
             const userRoles = dataPayload.roles.split('|');
             request.user = dataPayload; // Gắn vào request

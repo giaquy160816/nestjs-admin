@@ -1,7 +1,8 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Headers, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { LoginGGDto } from './dto/login-gg.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { Public } from 'src/decorators/public.decorator';
 
@@ -15,6 +16,15 @@ export class AuthController {
         return this.authService.login(loginDto);
     }
 
+    @Post('login-gg')
+    async loginGG(@Headers('authorization') authHeader: string) {
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            throw new UnauthorizedException('Invalid authorization header format');
+        }
+        const token = authHeader.split(' ')[1];
+        return this.authService.loginGG(token);
+    }
+
     @Post('register')
     async register(@Body() registerDto: RegisterDto) {
         return this.authService.register(registerDto);
@@ -24,4 +34,5 @@ export class AuthController {
     async refreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
         return this.authService.refreshToken(refreshTokenDto);
     }
+
 } 

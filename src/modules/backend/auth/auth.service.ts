@@ -6,9 +6,15 @@ import * as bcrypt from 'bcrypt';
 import { RegisterDto } from './dto/register.dto';
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/login.dto';
+import { LoginGGDto } from './dto/login-gg.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import configuration from '../../../config/configuration';
 import { generateTokens } from '../../../utils/token/jwt.utils';
+
+
+
+// check token jwt gg
+import * as adminGG from 'firebase-admin';
 
 @Injectable()
 export class AuthService {
@@ -61,6 +67,7 @@ export class AuthService {
         };
     }
 
+
     async register(registerDto: RegisterDto) {
         const { email, fullname, password } = registerDto;
 
@@ -111,5 +118,25 @@ export class AuthService {
             message: 'Token refreshed',
             data: { email: payload.email },
         };
+    }
+
+    async loginGG(token: string) {
+        if (!token) {
+            throw new BadRequestException('No token provided');
+        }
+        console.log('token', token);
+        try {
+
+            const decoded = await adminGG.auth().verifyIdToken(token);
+
+            const users = await adminGG.auth().listUsers();
+            console.log('users', users);
+            return {
+                message: 'Token is valid',
+                data: users
+            };
+        } catch (err) {
+            throw new BadRequestException('Invalid token');
+        }
     }
 } 

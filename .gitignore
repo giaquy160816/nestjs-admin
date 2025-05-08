@@ -3,6 +3,9 @@
 /node_modules
 /build
 
+# Keys
+/src/keys
+
 # Logs
 logs
 *.log

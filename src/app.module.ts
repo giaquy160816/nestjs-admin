@@ -1,9 +1,15 @@
+// Libaries NestJS
 import { APP_GUARD } from '@nestjs/core';
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RouterModule } from '@nestjs/core';
+import { CacheModule } from '@nestjs/cache-manager';
+
+// Libaries Third Party
+import { initializeApp } from 'firebase-admin/app';
+import { credential } from 'firebase-admin';
 
 
 import configuration from './config/configuration';
@@ -24,7 +30,7 @@ import { backendRoutes, backendModules } from './routes/backend.routes';
 //guards
 import { AuthGuard } from 'src/guards/auth/auth.guard';
 import { RolesGuard } from 'src/guards/auth/roles.guard';
-
+import { createKeyv } from '@keyv/redis';
 
 @Module({
     imports: [
@@ -71,19 +77,38 @@ import { RolesGuard } from 'src/guards/auth/roles.guard';
                     limit: 10,
                 },
             ],
-        })
+        }),
+        CacheModule.registerAsync({
+            isGlobal: true,
+            useFactory: async (configService: ConfigService) => ({
+                ttl: 60000,
+                store: [
+                    createKeyv('redis://127.0.0.1:6379'),
+                ]
+            }),
+        }),
     ],
     controllers: [],
     providers: [
         { provide: APP_GUARD, useClass: ThrottlerGuard },  //giới hạn số lần gọi API
-        { provide: APP_GUARD, useClass: AuthGuard },
-        { provide: APP_GUARD, useClass: RolesGuard },
+        { provide: APP_GUARD, useClass: AuthGuard }, // check token jwt
+        { provide: APP_GUARD, useClass: RolesGuard }, // check role
     ],
 })
 export class AppModule implements NestModule {
+    constructor() {
+        const app = initializeApp({
+            credential: credential.cert('src/keys/firebase-admin-key.json'),
+        });
+        console.log('AppModule constructor');
+    }
     configure(consumer: MiddlewareConsumer) {
         consumer
-            .apply(IpWhitelistMiddleware, RequestTimingMiddleware, SanitizeInputMiddleware)
+            .apply(
+                IpWhitelistMiddleware,
+                RequestTimingMiddleware,
+                SanitizeInputMiddleware
+            )
             .forRoutes('*');
     }
 }
