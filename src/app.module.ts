@@ -17,6 +17,8 @@ import configuration from './config/configuration';
 //datasource
 import PostgresDataSource from './datasources/postgres.datasource';
 import MysqlDataSource from './datasources/mysql.datasource';
+import { CustomElasticsearchModule } from './elasticsearch/elasticsearch.module';
+
 
 //middlewares
 import { SanitizeInputMiddleware } from './middlewares/sanitize-input.middleware';
@@ -27,10 +29,15 @@ import { IpWhitelistMiddleware } from './middlewares/ip-whitelist.middleware';
 import { frontendRoutes, frontendModules } from './routes/frontend.routes';
 import { backendRoutes, backendModules } from './routes/backend.routes';
 
+
 //guards
 import { AuthGuard } from 'src/guards/auth/auth.guard';
 import { RolesGuard } from 'src/guards/auth/roles.guard';
 import { createKeyv } from '@keyv/redis';
+import { SearchService } from './elasticsearch/search.service';
+
+import { DatabaseService } from './database/database.service';
+
 
 @Module({
     imports: [
@@ -39,6 +46,8 @@ import { createKeyv } from '@keyv/redis';
             envFilePath: ['.env'],
             load: [configuration],
         }),
+
+        CustomElasticsearchModule,
         RouterModule.register([
             ...frontendRoutes,
             ...backendRoutes,
@@ -80,10 +89,11 @@ import { createKeyv } from '@keyv/redis';
         }),
         CacheModule.registerAsync({
             isGlobal: true,
+            inject: [ConfigService],
             useFactory: async (configService: ConfigService) => ({
                 ttl: 60000,
                 store: [
-                    createKeyv('redis://127.0.0.1:6379'),
+                    createKeyv(`redis://${configService.get<string>('redis.host')}:${configService.get<number>('redis.port')}`)
                 ]
             }),
         }),
@@ -92,7 +102,9 @@ import { createKeyv } from '@keyv/redis';
     providers: [
         { provide: APP_GUARD, useClass: ThrottlerGuard },  //giới hạn số lần gọi API
         { provide: APP_GUARD, useClass: AuthGuard }, // check token jwt
-        { provide: APP_GUARD, useClass: RolesGuard }, // check role
+        { provide: APP_GUARD, useClass: RolesGuard },
+        SearchService, // check role
+        // DatabaseService, // chỉ dùng khi chạy sv lần đầu xoá hết table tạo lại
     ],
 })
 export class AppModule implements NestModule {

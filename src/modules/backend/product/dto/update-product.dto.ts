@@ -1,8 +1,4 @@
-import { PickType } from '@nestjs/mapped-types';
-import { Product } from '../entities/product.entity';
+import { PartialType } from '@nestjs/mapped-types';
+import { CreateProductDto } from './create-product.dto';
 
-export class UpdateProductDto extends PickType(
-    Product, [
-        'name', 'description', 'price', 'image', 'categories'
-    ] as const
-) {}
+export class UpdateProductDto extends PartialType(CreateProductDto) {}

@@ -8,7 +8,7 @@ export class RequestTimingMiddleware implements NestMiddleware {
 
         res.on('finish', () => {
             const duration = Date.now() - startTime;
-            // console.log(`[${req.method}] ${req.originalUrl} - ${duration}ms`);
+            console.log(`[${req.method}] ${req.originalUrl} - ${duration}ms`);
         });
 
         next();

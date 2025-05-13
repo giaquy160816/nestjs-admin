@@ -5,6 +5,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import { Product } from './entities/product.entity';
 import { Category } from '../category/entities/category.entity';
+import { SearchProductService } from './searchproduct.service';
+
 
 @Injectable()
 export class ProductService {
@@ -13,77 +15,100 @@ export class ProductService {
         private productRepository: Repository<Product>,
         @InjectRepository(Category)
         private categoryRepository: Repository<Category>,
-    ) {}
+        private SearchProductService: SearchProductService,
+    ) {
+    }
 
     async create(createProductDto: CreateProductDto) {
-        // If categories are provided as an array of IDs
+        const product = new Product();
+        product.name = createProductDto.name;
+        product.description = createProductDto.description;
+        product.price = createProductDto.price;
+        product.image = createProductDto.image;
+        product.isActive = createProductDto.isActive ?? true;
+        product.album = createProductDto.album ?? [];
+
+        // Nếu có danh sách category ID
         if (createProductDto.categories && Array.isArray(createProductDto.categories)) {
-            // Check if categories are provided as array of numbers (IDs)
-            if (typeof createProductDto.categories[0] === 'number') {
-                const categoryIds = createProductDto.categories as unknown as number[];
-                const categories = await this.categoryRepository.find({
-                    where: { id: In(categoryIds) }
-                });
+            const categoryIds = createProductDto.categories;
+            const categories = await this.categoryRepository.find({
+                where: { id: In(categoryIds) },
+            });
 
-                if (categories.length !== categoryIds.length) {
-                    throw new HttpException('Some categories were not found', HttpStatus.BAD_REQUEST);
-                }
-
-                // Replace the array of IDs with actual category entities
-                createProductDto.categories = categories;
+            if (categories.length !== categoryIds.length) {
+                throw new HttpException('Some categories were not found', HttpStatus.BAD_REQUEST);
             }
-            // If categories are already provided as objects with IDs, TypeORM will handle it
+
+            product.categories = categories;
         }
 
-        return await this.productRepository.save(createProductDto);
+        const result = await this.productRepository.save(product);
+        const resultIndex = await this.SearchProductService.indexProduct('products', result);
+        console.log(resultIndex);
+        return resultIndex;
     }
 
     async update(id: number, updateProductDto: UpdateProductDto) {
         const product = await this.productRepository.findOne({
             where: { id },
-            relations: ['categories']
+            relations: ['categories'],
         });
 
         if (!product) {
             throw new HttpException('Product not found', HttpStatus.NOT_FOUND);
         }
 
-        // Handle categories if they are provided as an array of IDs
+        // Cập nhật các trường đơn giản
+        product.name = updateProductDto.name ?? product.name;
+        product.description = updateProductDto.description ?? product.description;
+        product.price = updateProductDto.price ?? product.price;
+        product.image = updateProductDto.image ?? product.image;
+        product.isActive = updateProductDto.isActive ?? product.isActive;
+        product.album = updateProductDto.album ?? product.album;
+
+        // Cập nhật category nếu có
         if (updateProductDto.categories && Array.isArray(updateProductDto.categories)) {
-            if (typeof updateProductDto.categories[0] === 'number') {
-                const categoryIds = updateProductDto.categories as unknown as number[];
-                const categories = await this.categoryRepository.find({
-                    where: { id: In(categoryIds) }
-                });
+            const categoryIds = updateProductDto.categories;
+            const categories = await this.categoryRepository.find({
+                where: { id: In(categoryIds) },
+            });
 
-                if (categories.length !== categoryIds.length) {
-                    throw new HttpException('Some categories were not found', HttpStatus.BAD_REQUEST);
-                }
-
-                // Replace the array of IDs with actual category entities
-                updateProductDto.categories = categories;
+            if (categories.length !== categoryIds.length) {
+                throw new HttpException('Some categories were not found', HttpStatus.BAD_REQUEST);
             }
+
+            product.categories = categories;
         }
 
-        // Merge the product with the update DTO
-        const updatedProduct = { ...product, ...updateProductDto };
-
-        // Save the updated product
-        return await this.productRepository.save(updatedProduct);
+        return await this.productRepository.save(product);
     }
 
-    async remove(id: number) {
-        const product = await this.productRepository.findOne({ where: { id } });
-        if (!product) {
+    async searchProducts(q: string) {
+        return this.SearchProductService.searchAdvanced(q);
+    }
+
+    async findAll(): Promise<Product[]> {
+        return this.productRepository.find();
+    }
+
+    async delete(id: number): Promise<void> {
+        const result = await this.productRepository.delete(id);
+        if (result.affected === 0) {
             throw new HttpException('Product not found', HttpStatus.NOT_FOUND);
         }
-        return await this.productRepository.delete(id);
     }
 
-    async findAll() {
-        return await this.productRepository.find({
-            relations: ['categories']
-        });
+    async removeProduct(productId: number) {
+        await this.productRepository.delete(productId); // xoá trong DB
+        const result = await this.SearchProductService.deleteProductFromIndex(productId); // xoá trong ES
+        return {
+            message: 'Product deleted from DB and ES.',
+            result: result,
+        };
+    }
+
+    async forceDeleteByContent(productId: number) {
+        return this.SearchProductService.deleteByFieldId(productId);
     }
 
     async findOne(id: number) {
@@ -95,5 +120,20 @@ export class ProductService {
             throw new HttpException('Product not found', HttpStatus.NOT_FOUND);
         }
         return product;
+    }
+
+    async reindexAllToES() {
+        const products = await this.productRepository.find({
+            relations: ['categories'],
+        });
+        await this.SearchProductService.reindexAllProducts(products);
+
+        console.log(`🗃️ DB có ${products.length} sản phẩm`);
+
+
+        return {
+            message: 'Reindex all products to ES successfully',
+            products: products,
+        };
     }
 }

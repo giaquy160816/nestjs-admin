@@ -21,6 +21,13 @@ export default () => ({
         refresh: '14fc03226adb5a25f397e9a6916714c251db99b82a48125696142f794bb7e9c1d2423dcf77e236243aa7639b11fd1d960f8e3edbeae42bd625c1d80065cb3f991c09e1d144f0dfbf1911738e1f020134999fd22d6ae5acb1d4b55ad2cdb8654e7af8826dc131c5973ee86a3aaf636873a1705fd853e2eadd0993a2045dda6791cad473c4fe0e61e7b5aeaa5ea83fad9ebb067f7bbe1ecb39bfc4d35dff33bb8364a79bbc7c0ceb881e547540ea0841d2ede86834ee019d6ba8f687e65e208c2143d71c15e109448b12dc933134ab757ccf8849cc0e99ecaed849a7927460c8c7e61e7fd5c3920f96c2b91848ced0f22d269930af4d5b0dc2ccb3195a238d64f1',
         refreshExpires: '7d',
     },
+    elasticsearch: {
+        node: 'http://localhost:9200'
+    },
+    redis: {
+        host: 'localhost',
+        port: 6379,
+    },
     cors: ['http://localhost:3000', 'http://localhost:4000'],
     ipWhitelist: ['127.0.0.1', '::1', '::ffff:127.0.0.1'] , // default
 });

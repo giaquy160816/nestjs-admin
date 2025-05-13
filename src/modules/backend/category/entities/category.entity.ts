@@ -1,31 +1,30 @@
-import { IsBoolean, IsNotEmpty } from "class-validator";
-import { Product } from "src/modules/backend/product/entities/product.entity";
-import { Column, CreateDateColumn, Entity, ManyToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import {
+    Column,
+    CreateDateColumn,
+    Entity,
+    PrimaryGeneratedColumn,
+    UpdateDateColumn,
+    ManyToMany,
+} from 'typeorm';
+import { Product } from 'src/modules/backend/product/entities/product.entity';
 
 @Entity('category')
 export class Category {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @IsNotEmpty()
     @Column()
     name: string;
-    
 
-    @IsBoolean()
-    @Column({default: true})
-    isActive: boolean
+    @Column({ default: true })
+    isActive: boolean;
 
-    @CreateDateColumn({
-        type: 'timestamptz',
-    })
+    @CreateDateColumn({ type: 'timestamptz' })
     createdAt: Date;
 
-    @UpdateDateColumn({
-        type: 'timestamptz',
-    })
+    @UpdateDateColumn({ type: 'timestamptz' })
     updatedAt: Date;
-    
+
     @ManyToMany(() => Product, (product) => product.categories)
     products: Product[];
 }

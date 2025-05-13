@@ -1,4 +1,10 @@
-import { PickType } from "@nestjs/mapped-types";
-import { Category } from "../entities/category.entity";
+import { IsNotEmpty, IsOptional, IsBoolean } from 'class-validator';
 
-export class CreateCategoryDto extends PickType(Category, ['name'] as const) {}
+export class CreateCategoryDto {
+    @IsNotEmpty()
+    name: string;
+
+    @IsOptional()
+    @IsBoolean()
+    isActive?: boolean;
+}
