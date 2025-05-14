@@ -1,7 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn, OneToOne, OneToMany, UpdateDateColumn, CreateDateColumn, JoinColumn, ManyToMany, JoinTable } from "typeorm";
-import { Profile } from "../../profile/entities/profile.entity";
 import { Photo } from "../../photo/entities/photo.entity";
-import { IsEmail, IsNotEmpty } from "class-validator";
 import { Auth } from '../../auth/entities/auth.entity';
 import { GroupPermission } from "../../auth/entities/group_permission.entity";
 
@@ -14,8 +12,6 @@ export class User {
     fullname: string;
 
     @Column()
-    @IsEmail()
-    @IsNotEmpty()
     email: string;
 
     @CreateDateColumn({
@@ -27,10 +23,6 @@ export class User {
         type: 'timestamptz',
     })
     updatedAt: Date;
-    
-
-    @OneToOne(() => Profile, (profile) => profile.user)
-    profile: Profile;
 
     @OneToMany(() => Photo, (photo) => photo.user)
     photos: Photo[];

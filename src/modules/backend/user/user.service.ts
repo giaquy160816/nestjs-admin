@@ -90,29 +90,11 @@ export class UserService {
 
             const user = await this.userRepository.findOne({
                 where: { id: Number(id) },
-                relations: { profile: true }
             });
 
             if (!user) {
                 throw new HttpException('User not found', HttpStatus.NOT_FOUND);
             }
-
-            // Start a transaction
-            await entityManager.transaction(async transactionalEntityManager => {
-                if (user.profile) {
-                    await transactionalEntityManager
-                        .getRepository('Profile')
-                        .delete(user.profile.id);
-                    console.log('Profile deleted successfully');
-                } else {
-                    console.log('No profile found for this user');
-                }
-
-                // Then remove the user
-                await transactionalEntityManager
-                    .getRepository('User')
-                    .delete(user.id);
-            });
 
             return { message: 'User and profile deleted successfully' };
 

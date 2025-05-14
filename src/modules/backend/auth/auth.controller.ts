@@ -2,7 +2,6 @@ import { Controller, Post, Body, Headers, UnauthorizedException } from '@nestjs/
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { LoginGGDto } from './dto/login-gg.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { Public } from 'src/decorators/public.decorator';
 

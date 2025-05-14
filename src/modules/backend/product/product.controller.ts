@@ -12,6 +12,7 @@ import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Public } from 'src/decorators/public.decorator';
+import { UseDatabaseToken } from 'src/common/decorators/use-database-token.decorator';
 
 @Controller()
 @Public()
@@ -34,6 +35,7 @@ export class ProductController {
     }
 
     @Get('search')
+    @UseDatabaseToken() 
     search(@Query('q') q: string) {
         return this.productService.searchProducts(q);
     }

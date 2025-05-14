@@ -31,12 +31,14 @@ import { backendRoutes, backendModules } from './routes/backend.routes';
 
 
 //guards
-import { AuthGuard } from 'src/guards/auth/auth.guard';
+import { AuthGuard } from './guards/auth/auth.guard';
+import { DatabaseTokenGuard } from './guards/auth/database-token.guard';
 import { RolesGuard } from 'src/guards/auth/roles.guard';
 import { createKeyv } from '@keyv/redis';
 import { SearchService } from './elasticsearch/search.service';
 
 import { DatabaseService } from './database/database.service';
+import { AccessToken } from './modules/backend/auth/entities/access-token.entity';
 
 
 @Module({
@@ -55,6 +57,7 @@ import { DatabaseService } from './database/database.service';
         ...frontendModules,
         ...backendModules,
 
+        TypeOrmModule.forFeature([AccessToken]),
         TypeOrmModule.forRootAsync({
             inject: [ConfigService],
             useFactory: () => {
@@ -102,6 +105,7 @@ import { DatabaseService } from './database/database.service';
     providers: [
         { provide: APP_GUARD, useClass: ThrottlerGuard },  //giới hạn số lần gọi API
         { provide: APP_GUARD, useClass: AuthGuard }, // check token jwt
+        { provide: APP_GUARD, useClass: DatabaseTokenGuard }, // check token from database
         { provide: APP_GUARD, useClass: RolesGuard },
         SearchService, // check role
         // DatabaseService, // chỉ dùng khi chạy sv lần đầu xoá hết table tạo lại
