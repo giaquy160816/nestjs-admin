@@ -6,9 +6,11 @@ import { Repository, In } from 'typeorm';
 import { Product } from './entities/product.entity';
 import { Category } from '../category/entities/category.entity';
 import { SearchProductService } from './searchproduct.service';
+import { Public } from 'src/decorators/public.decorator';
 
 
 @Injectable()
+@Public()
 export class ProductService {
     constructor(
         @InjectRepository(Product)
@@ -18,6 +20,28 @@ export class ProductService {
         private SearchProductService: SearchProductService,
     ) {
     }
+
+    async formatAndIndexProduct(product: Product) {
+        // Format lại dữ liệu thành dạng phù hợp với Elasticsearch
+        const formattedProduct: ProductDocument = {
+            id: product.id,
+            name: product.name,
+            description: product.description,
+            price: product.price,
+            image: product.image,
+            isActive: product.isActive,
+            album: product.album,
+            createdAt: product.createdAt,
+            updatedAt: product.updatedAt,
+            category_ids: product.categories ? product.categories.map(category => category.id) : [],
+        };
+    
+        // Index dữ liệu vào Elasticsearch
+        const resultIndex = await this.SearchProductService.indexProduct('products', formattedProduct);
+        console.log(resultIndex);
+        return resultIndex;
+    }
+    
 
     async create(createProductDto: CreateProductDto) {
         const product = new Product();
@@ -43,7 +67,9 @@ export class ProductService {
         }
 
         const result = await this.productRepository.save(product);
-        const resultIndex = await this.SearchProductService.indexProduct('products', result);
+
+        const resultIndex = await this.formatAndIndexProduct(result);
+
         console.log(resultIndex);
         return resultIndex;
     }
@@ -83,6 +109,7 @@ export class ProductService {
         return await this.productRepository.save(product);
     }
 
+    
     async searchProducts(q: string) {
         return this.SearchProductService.searchAdvanced(q);
     }

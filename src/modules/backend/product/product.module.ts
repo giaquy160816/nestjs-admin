@@ -5,17 +5,26 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
 import { Category } from '../category/entities/category.entity';
 import { SearchProductService } from './searchproduct.service';
-
+import { ProductMicroservice } from './product.microservice';
 import { CustomElasticsearchModule } from 'src/elasticsearch/elasticsearch.module';
-
+import { ClientsModule } from '@nestjs/microservices';
+import { ConfigService } from '@nestjs/config';
+import { rabbitMqConfig } from './rabbitmq.config';
 
 @Module({
     imports: [
         TypeOrmModule.forFeature([Product, Category]),
         CustomElasticsearchModule,
+        ClientsModule.registerAsync([
+            {
+                name: 'APP_SERVICE',
+                inject: [ConfigService],
+                useFactory: (configService: ConfigService) => rabbitMqConfig(configService),
+            },
+        ]),
     ],
-    controllers: [ProductController],
+    controllers: [ProductController, ProductMicroservice],
     providers: [ProductService, SearchProductService],
+    exports: [ProductService],
 })
-
-export class ProductModule { }
+export class ProductModule {}

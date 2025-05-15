@@ -28,6 +28,11 @@ export default () => ({
         host: 'localhost',
         port: 6379,
     },
+    rabbitmq: {
+        url: 'amqp://user:password@localhost:5672',
+        queue: 'myqueue',
+    },
     cors: ['http://localhost:3000', 'http://localhost:4000'],
     ipWhitelist: ['127.0.0.1', '::1', '::ffff:127.0.0.1'] , // default
+    port: 3000,
 });

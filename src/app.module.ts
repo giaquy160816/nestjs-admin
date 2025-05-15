@@ -39,7 +39,9 @@ import { SearchService } from './elasticsearch/search.service';
 
 import { DatabaseService } from './database/database.service';
 import { AccessToken } from './modules/backend/auth/entities/access-token.entity';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 
+import { rabbitMqConfig } from './modules/backend/product/rabbitmq.config';
 
 @Module({
     imports: [
@@ -100,6 +102,13 @@ import { AccessToken } from './modules/backend/auth/entities/access-token.entity
                 ]
             }),
         }),
+        ClientsModule.registerAsync([
+            {
+                name: 'APP_SERVICE',
+                inject: [ConfigService],
+                useFactory: (configService: ConfigService) => rabbitMqConfig(configService),
+            },
+        ])
     ],
     controllers: [],
     providers: [

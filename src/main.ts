@@ -4,6 +4,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { TimeoutInterceptor } from './interceptors/timeout/timeout.interceptor';
 import * as cookieParser from 'cookie-parser';
 import { ConfigService } from '@nestjs/config';
+import { Transport } from '@nestjs/microservices';
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
@@ -18,6 +19,29 @@ async function bootstrap() {
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
         credentials: true,
     });
-    await app.listen(process.env.PORT ?? 3000); // Changed port to 5000
+
+    const url = configService.get<string>('rabbitmq.url');
+    const queue = configService.get<string>('rabbitmq.queue');
+
+    if (!url || !queue) {
+        throw new Error('RabbitMQ configuration is missing');
+    }
+
+    app.connectMicroservice(
+        {
+            transport: Transport.RMQ,
+            options: {
+                urls: [url],
+                queue: queue,
+                queueOptions: {
+                    durable: false,
+                },
+            },
+        },
+    );
+    await app.startAllMicroservices();
+
+    const port = configService.get<number>('port') || 3000;
+    await app.listen(port);
 }
 bootstrap();
