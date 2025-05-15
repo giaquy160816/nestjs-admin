@@ -33,6 +33,7 @@ export class SearchProductService implements OnApplicationBootstrap {
 
 
     async indexProduct(index: string, document: any) {
+        console.log('indexProduct', index, document);
         return await this.searchService.index({
             index: 'products',
             id: document.id.toString(), // ✅ dùng id làm khóa

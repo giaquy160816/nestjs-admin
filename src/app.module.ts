@@ -41,7 +41,7 @@ import { DatabaseService } from './database/database.service';
 import { AccessToken } from './modules/backend/auth/entities/access-token.entity';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 
-import { rabbitMqConfig } from './modules/backend/product/rabbitmq.config';
+import { rabbitMqConfig } from './config/rabbitMQ/rabbitmq.config';
 
 @Module({
     imports: [

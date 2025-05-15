@@ -8,7 +8,7 @@ import { ProductMicroservice } from './product.microservice';
 import { CustomElasticsearchModule } from 'src/elasticsearch/elasticsearch.module';
 import { ClientsModule } from '@nestjs/microservices';
 import { ConfigService } from '@nestjs/config';
-import { rabbitMqConfig } from './rabbitmq.config';
+import { rabbitMqConfig } from '../../../config/rabbitMQ/rabbitmq.config';
 import { ProductService } from './product.service';
 import { ProductController } from './product.controller';
 

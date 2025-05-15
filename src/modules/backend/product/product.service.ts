@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -7,6 +7,7 @@ import { Product } from './entities/product.entity';
 import { Category } from '../category/entities/category.entity';
 import { SearchProductService } from './searchproduct.service';
 import { Public } from 'src/decorators/public.decorator';
+import { ClientProxy } from '@nestjs/microservices';
 
 
 @Injectable()
@@ -18,11 +19,11 @@ export class ProductService {
         @InjectRepository(Category)
         private categoryRepository: Repository<Category>,
         private SearchProductService: SearchProductService,
+        @Inject('APP_SERVICE') private readonly client: ClientProxy,
     ) {
     }
 
     async formatAndIndexProduct(product: Product) {
-        // Format lại dữ liệu thành dạng phù hợp với Elasticsearch
         const formattedProduct: ProductDocument = {
             id: product.id,
             name: product.name,
@@ -36,10 +37,8 @@ export class ProductService {
             category_ids: product.categories ? product.categories.map(category => category.id) : [],
         };
     
-        // Index dữ liệu vào Elasticsearch
-        const resultIndex = await this.SearchProductService.indexProduct('products', formattedProduct);
-        console.log(resultIndex);
-        return resultIndex;
+        this.client.emit('index_product', { index: 'products', document: formattedProduct }).subscribe();
+        return formattedProduct;
     }
     
 
@@ -68,10 +67,11 @@ export class ProductService {
 
         const result = await this.productRepository.save(product);
 
-        const resultIndex = await this.formatAndIndexProduct(result);
-
-        console.log(resultIndex);
-        return resultIndex;
+        const formattedProduct = await this.formatAndIndexProduct(result);
+        return {
+            message: 'Product created successfully',
+            result: formattedProduct,
+        };
     }
 
     async update(id: number, updateProductDto: UpdateProductDto) {
@@ -106,7 +106,12 @@ export class ProductService {
             product.categories = categories;
         }
 
-        return await this.productRepository.save(product);
+        const result = await this.productRepository.save(product);
+
+        const formattedProduct = await this.formatAndIndexProduct(result);
+        return {
+            message: 'Product updated successfully',
+        };
     }
 
     
@@ -153,14 +158,11 @@ export class ProductService {
         const products = await this.productRepository.find({
             relations: ['categories'],
         });
-        await this.SearchProductService.reindexAllProducts(products);
-
+        const formattedProducts = await Promise.all(products.map(product => this.formatAndIndexProduct(product)));
         console.log(`🗃️ DB có ${products.length} sản phẩm`);
-
-
         return {
             message: 'Reindex all products to ES successfully',
-            products: products,
+            products: formattedProducts,
         };
     }
 }
