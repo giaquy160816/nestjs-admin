@@ -47,7 +47,7 @@ export class DatabaseTokenGuard implements CanActivate {
             console.log(accessToken);
 
             if (!accessToken) {
-                throw new HttpException('Invalid token', HttpStatus.UNAUTHORIZED);
+                throw new HttpException('Invalid token Custom', HttpStatus.UNAUTHORIZED);
             }
 
             // Check if token is expired
@@ -73,7 +73,7 @@ export class DatabaseTokenGuard implements CanActivate {
             if (error instanceof HttpException) {
                 throw error;
             }
-            throw new HttpException('Invalid token 1', HttpStatus.UNAUTHORIZED);
+            throw new HttpException('Invalid token Custom 1', HttpStatus.UNAUTHORIZED);
         }
     }
 } 

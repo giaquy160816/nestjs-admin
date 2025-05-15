@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ProductService } from './product.service';
-import { ProductController } from './product.controller';
+
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
 import { Category } from '../category/entities/category.entity';
@@ -10,6 +9,8 @@ import { CustomElasticsearchModule } from 'src/elasticsearch/elasticsearch.modul
 import { ClientsModule } from '@nestjs/microservices';
 import { ConfigService } from '@nestjs/config';
 import { rabbitMqConfig } from './rabbitmq.config';
+import { ProductService } from './product.service';
+import { ProductController } from './product.controller';
 
 @Module({
     imports: [
