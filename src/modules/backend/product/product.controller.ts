@@ -35,7 +35,6 @@ export class ProductController {
     }
 
     @Get('search')
-    @UseDatabaseToken() 
     search(@Query('q') q: string) {
         return this.productService.searchProducts(q);
     }
