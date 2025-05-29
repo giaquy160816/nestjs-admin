@@ -31,11 +31,11 @@ export class AuthService {
             relations: ['user', 'user.groupPermissions', 'user.groupPermissions.permissions']
         });
         if (!auth) {
-            throw new BadRequestException('Invalid email or password');
+            throw new HttpException('Invalid email or password', HttpStatus.BAD_REQUEST);
         }
         const isMatch = await bcrypt.compare(password, auth.password);
         if (!isMatch) {
-            throw new BadRequestException('Invalid email or password');
+            throw new HttpException('Invalid email or password', HttpStatus.BAD_REQUEST);
         }
 
         const user = auth.user;

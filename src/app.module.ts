@@ -17,7 +17,7 @@ import configuration from './config/configuration';
 //datasource
 import PostgresDataSource from './datasources/postgres.datasource';
 import MysqlDataSource from './datasources/mysql.datasource';
-import { CustomElasticsearchModule } from './elasticsearch/elasticsearch.module';
+import { CustomElasticsearchModule } from './service/elasticsearch/elasticsearch.module';
 
 
 //middlewares
@@ -35,13 +35,14 @@ import { AuthGuard } from './guards/auth/auth.guard';
 import { DatabaseTokenGuard } from './guards/auth/database-token.guard';
 import { RolesGuard } from 'src/guards/auth/roles.guard';
 import { createKeyv } from '@keyv/redis';
-import { SearchService } from './elasticsearch/search.service';
+import { SearchService } from './service/elasticsearch/search.service';
 
 import { DatabaseService } from './database/database.service';
 import { AccessToken } from './modules/backend/auth/entities/access-token.entity';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 
-import { rabbitMqConfig } from './config/rabbitMQ/rabbitmq.config';
+import { rabbitMqConfig } from './service/rabbitMQ/rabbitmq.config';
+import { SupabaseService } from './service/supabase/supabase.service';
 
 @Module({
     imports: [
@@ -116,7 +117,8 @@ import { rabbitMqConfig } from './config/rabbitMQ/rabbitmq.config';
         { provide: APP_GUARD, useClass: AuthGuard }, // check token jwt
         { provide: APP_GUARD, useClass: DatabaseTokenGuard }, // check token from database
         { provide: APP_GUARD, useClass: RolesGuard },
-        SearchService, // check role
+        SearchService,
+        SupabaseService, // check role
         // DatabaseService, // chỉ dùng khi chạy sv lần đầu xoá hết table tạo lại
     ],
 })

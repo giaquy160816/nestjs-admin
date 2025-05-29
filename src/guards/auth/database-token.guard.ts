@@ -1,7 +1,7 @@
 import { CanActivate, ExecutionContext, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from 'src/common/constants/meta-keys';
-import { USE_DATABASE_TOKEN_KEY } from 'src/common/decorators/use-database-token.decorator';
+import { USE_DATABASE_TOKEN_KEY } from 'src/decorators/use-database-token.decorator';
 import { extractTokenFromHeader } from 'src/utils/token/extractToken.utils';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';

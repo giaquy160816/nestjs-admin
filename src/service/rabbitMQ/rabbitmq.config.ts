@@ -16,6 +16,7 @@ export const rabbitMqConfig = (configService: ConfigService): RmqOptions => {
         options: {
             urls: [url],
             queue: queue,
+            noAck: false,
             queueOptions: {
                 durable: false,
             },

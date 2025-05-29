@@ -5,6 +5,8 @@ import { TimeoutInterceptor } from './interceptors/timeout/timeout.interceptor';
 import * as cookieParser from 'cookie-parser';
 import { ConfigService } from '@nestjs/config';
 import { Transport } from '@nestjs/microservices';
+import { DocumentBuilder } from '@nestjs/swagger';
+import { SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
@@ -40,6 +42,23 @@ async function bootstrap() {
         },
     );
     await app.startAllMicroservices();
+
+    const config = new DocumentBuilder()
+        .setTitle('Đi học cho biết với người ta')
+        .setDescription('API đi học cho biết với người ta')
+        .setVersion('1.0')
+        .addTag('api')
+        .addBearerAuth({
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'JWT',
+            description: 'JWT Authorization header using the Bearer scheme',
+            in: 'header',
+            name: 'Authorization',
+        }, 'access_token')
+        .build();
+    const documentFactory = () => SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api', app, documentFactory);
 
     const port = configService.get<number>('port') || 3000;
     await app.listen(port);

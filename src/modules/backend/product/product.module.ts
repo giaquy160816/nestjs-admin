@@ -5,10 +5,10 @@ import { Product } from './entities/product.entity';
 import { Category } from '../category/entities/category.entity';
 import { SearchProductService } from './searchproduct.service';
 import { ProductMicroservice } from './product.microservice';
-import { CustomElasticsearchModule } from 'src/elasticsearch/elasticsearch.module';
+import { CustomElasticsearchModule } from 'src/service/elasticsearch/elasticsearch.module';
 import { ClientsModule } from '@nestjs/microservices';
 import { ConfigService } from '@nestjs/config';
-import { rabbitMqConfig } from '../../../config/rabbitMQ/rabbitmq.config';
+import { rabbitMqConfig } from '../../../service/rabbitMQ/rabbitmq.config';
 import { ProductService } from './product.service';
 import { ProductController } from './product.controller';
 
