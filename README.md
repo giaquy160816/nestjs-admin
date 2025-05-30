@@ -48,7 +48,7 @@ docker-compose restart dev
 
 Create `.env.development`:
 ```env
-DB_POSTGRES_HOST=postgres
+DB_POSTGRES_HOST=postgres-db
 DB_POSTGRES_PORT=5432
 DB_POSTGRES_USERNAME=myuser
 DB_POSTGRES_PASSWORD=mypassword
