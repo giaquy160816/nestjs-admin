@@ -1,4 +1,3 @@
-// src/modules/backend/product/config/rabbitmq.config.ts
 import { ConfigService } from '@nestjs/config';
 import { RmqOptions } from '@nestjs/microservices/interfaces';
 import { Transport } from '@nestjs/microservices';
@@ -16,10 +15,10 @@ export const rabbitMqConfig = (configService: ConfigService): RmqOptions => {
         options: {
             urls: [url],
             queue: queue,
-            noAck: false,
+            noAck: true,
             queueOptions: {
                 durable: false,
-            },
+            }
         },
     };
 };  

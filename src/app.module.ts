@@ -132,7 +132,7 @@ export class AppModule implements NestModule {
     configure(consumer: MiddlewareConsumer) {
         consumer
             .apply(
-                IpWhitelistMiddleware,
+                // IpWhitelistMiddleware,
                 RequestTimingMiddleware,
                 SanitizeInputMiddleware
             )

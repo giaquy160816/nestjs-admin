@@ -10,6 +10,7 @@ export class ProductMicroservice {
 
     @EventPattern('index_product')
     async handleIndexProduct(@Payload() data: { index: string; document: any }) {
+        console.log('handleIndexProduct', data);
         return this.searchProductService.indexProduct(data.index, data.document);
     }
 

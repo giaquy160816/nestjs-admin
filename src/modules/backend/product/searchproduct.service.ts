@@ -1,6 +1,5 @@
 import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import { ElasticsearchService } from '@nestjs/elasticsearch';
-import { Product } from './entities/product.entity';
 
 @Injectable()
 export class SearchProductService implements OnApplicationBootstrap {
